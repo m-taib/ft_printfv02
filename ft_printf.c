@@ -1,4 +1,4 @@
-//#include "ft_printf.h"
+#include "ft_printf.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -29,7 +29,7 @@ void    ft_bzero(void *s, size_t n)
         ft_memset(s, 0, n);
 }
 
-void    *ft_calloc(size_t count, size_t size)
+void    *libft_calloc(size_t count, size_t size)
 {
         void    *ptr;
 
@@ -40,27 +40,6 @@ void    *ft_calloc(size_t count, size_t size)
         return (ptr);
 }
 
-int	ft_atoi(const char *str)
-{
-	int		i;
-	int		arb;
-	int		res;
-	arb = 1;
-	i = 0;
-	while (str[i] && (str[i] == ' ' || str[i] == '\n' || str[i] == '\v' || str[i] == '\f'
-				|| str[i] == '\t' || str[i] == '\r'))
-		i++;	
-	if (str[i] == '-' || str[i] == '+')
-		if (str[i++] == '-')
-			arb *= -1;
-	res = 0;
-	while (str[i] && (str[i] >= '0' && str[i] <= '9'))
-	{
-		res = res * 10 + (str[i] - 48);
-		i++;
-	}
-	return (res * arb);
-}
 int	ft_strlen(const char *str)
 {
 	int	i;
@@ -116,7 +95,7 @@ void hex(unsigned int nb,char c,int *ptr)
 			ft_putchar(arr[nb%16] - 32,ptr);
 	}
 }
-void hexlong(long int nb,int *ptr)
+void hexlong(unsigned long nb,int *ptr)
 {
         char arr[16]="0123456789abcdef";
         if (nb / 16)
@@ -128,14 +107,20 @@ void	hexvalue(void *pt,int *ptr)
 {
 	ft_putchar('0',ptr);
 	ft_putchar('x',ptr);
-	hexlong((long int)pt,ptr);
+	hexlong((unsigned long)pt,ptr);
 }
 void	placeholder(char c,int *ptr,va_list args)
 {
 	if(c == 'c')
         	ft_putchar(va_arg(args,int),ptr);
 	if(c == 's')
-        	ft_putstr(va_arg(args,char *),ptr);
+	{
+		char *str;
+		str = va_arg(args,char *);
+		if (!str)
+			str = "(null)";
+		ft_putstr(str,ptr);
+	}
       	if(c == 'd' || c == 'i')
        		ft_putnbr(va_arg(args,int),c,ptr);
         if(c == 'u')
@@ -148,74 +133,31 @@ void	placeholder(char c,int *ptr,va_list args)
               	ft_putchar('%',ptr);
 	
 }
-// ITOA
-int		nlen(long int n)
-{
-	int		c;
-	c = 0;
-	if (n < 0)
-	{
-		n *= -1;
-		c++;
-	}
-	if (n ==0)
-		c++;
-	while(n)
-	{
-		n = n / 10;
-		c++;
-	}
-	return (c);
-}
-char *ft_itoa(int n)
-{
-	char	*str;
-	int		i;
-	long	j;
-	long nb;
-	nb = n;
 
-	i = nlen(n);
-	str = (char *)malloc(sizeof(char) *( nlen(nb)+1));
-	if (!str)
-		return (NULL);
-	j = 0;
-	if (nb < 0)
-	{
-		nb*= -1;
-		str[j] = '-';
-		j++;
-	}
-	str[i] = '\0';
-	i--;
-	while (i >= j)
-	{
-		str[i] = nb % 10 + 48;
-		nb = nb / 10;
-		i--;
-	}
-	return (str);
+int	ft_check_ph(char c)
+{
+	if (c == 'd' || c == 'i' || c == 'c'
+				|| c == 's' || c == 'x' ||
+				c == 'X' || c == 'p' || c == '%')
+			return (0);
+	return (1);
 }
 
-///////
-void comb(char *str,int *ptr,va_list args,t_list *pt)
+void comb(char *str,int *i,int *ptr,va_list args,t_list *pt)
 {
 	int cn;
-	int	i;
 	int	cz;
 	int n;
 	cz = 0;
-	i = 0;
 	cn = 0;
 	if (pt->minus == 1)
-		cn = ft_atoi(str+1);
-	if (pt->minus == 1 && pt->dec == 1)
 	{
-		while (str[i] && str[i] != '.')
-			i++;
-		i++;
+		cn = ft_atoi(&str[*i]);
+		while (str[*i] && str[*i] != '.')
+			*i = *i + 1;
+		*i = *i + 1;
 		n = va_arg(args,int);
-		cz = ft_atoi(str + i) - nlen(n);
+		cz = ft_atoi(str + *i) - nlen(n);
 		cn = cn - cz - nlen(n);
 		while(cz--)
 			write(1,"0",1);
@@ -223,30 +165,33 @@ void comb(char *str,int *ptr,va_list args,t_list *pt)
 		while(cn--)
 			write(1," ",1);	
 	}
+	while (!ft_check_ph(str[*i]) && str[*i])
+		*i = *i + 1;
+	//placeholder(str[*i],&cn,args);
 }
-void check(char *str,int *ptr,va_list args,t_list *pt)
+
+void check(char *str,int j,int *ptr,va_list args,t_list *pt)
 {
 	int	i;
 	i = 0;
-	while (str[i])
+	while (str[i] && str[i] != '.')
 	{
 		if (str[i] == '-')
 			pt->minus = 1;
 		if (str[i] == '0')
 			pt->zero = 1;
-		if (str[i] == 'd')
-			pt->dec = 1;
 		i++;
 	}
 	if (str[i] == '.')
 		pt->per = 1;
-	comb(str,ptr,args,pt);
+	comb(str,&j,ptr,args,pt);
 }
+
 int ft_printf(const char *str, ...)
 {
 	va_list args;
 	t_list *data;
-	data = ft_calloc(1,sizeof(t_list));
+	data = libft_calloc(1,sizeof(t_list));
 	va_start(args,str);
 	int	i;
 	int	cn;
@@ -254,13 +199,13 @@ int ft_printf(const char *str, ...)
 	i = 0;
 	while (i < ft_strlen(str))
 	{
-		if(str[i] != '%') //|| (data->minus != 1 || data->dec != 1))
+		if (str[i] != '%') //|| (data->minus != 1 || data->dec != 1))
 			ft_putchar(str[i],&cn);
 		else
 		{
 			i++;
-			check((char *)(str + i),&cn,args,data);
-			break;
+			check((char *)(str + i),i,&cn,args,data);
+		//	break;
 			//placeholder(str[i],&cn,args);
 		}
 		i++;
@@ -272,11 +217,16 @@ int main()
 {
 	int b;
 	b = 6;
-	ft_printf("%-10.2d",b);
-	printf("||\n%-10.2d",b);
+	ft_printf("%-10.2de",b);
+	//printf("\n%-10.0d",1);
 }
-/*
-int main()
+/*#include <stdio.h>
+int	main()
+{
+	ft_printf("This %p is even stranger", (void *)-1);
+	printf("This %p is even stranger", (void *)-1);
+}*/
+/*int main()
 {
 	char c = 'a';
 	char *s = "string";
