@@ -6,7 +6,7 @@
 /*   By: mtaib <mtaib@student.1337.ma>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/07 11:26:26 by mtaib             #+#    #+#             */
-/*   Updated: 2022/11/07 11:29:16 by mtaib            ###   ########.fr       */
+/*   Updated: 2022/11/08 20:19:41 by mtaib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "ft_printf.h"
@@ -52,32 +52,66 @@ int		nlen(long int n)
 	return (c);
 }
 
-char *ft_itoa(int n)
+void ft_printnb(int n,int *cn)
 {
-	char	*str;
-	int		i;
-	long	j;
-	long nb;
+	unsigned int 	nb;
 	nb = n;
+	//if(c!='u')
+	//{
+		if (n < 0)
+		{
+			ft_putchar('-',cn);
+			nb = n * -1;
+		}
+	//}
+	if (nb / 10)
+		ft_printnb(nb/10,cn);
+	ft_putchar((nb % 10) + 48,cn);
 
-	i = nlen(n);
-	str = (char *)malloc(sizeof(char) *( nlen(nb)+1));
-	if (!str)
-		return (NULL);
-	j = 0;
-	if (nb < 0)
+}
+void ft_putnbr_original(int n,int pwd,int *cn,int mwd)
+{
+	int		i;
+
+	i = 0;
+	while (pwd > nlen(n))
+		{
+			i++;
+			ft_putchar('0',cn);
+			pwd--;
+		}
+	ft_printnb(n,cn);
+	i = i + nlen(n);
+	while (mwd > i)
 	{
-		nb*= -1;
-		str[j] = '-';
-		j++;
+		ft_putchar(' ',cn);
+		mwd++;
 	}
-	str[i] = '\0';
-	i--;
-	while (i >= j)
-	{
-		str[i] = nb % 10 + 48;
-		nb = nb / 10;
-		i--;
-	}
-	return (str);
+}
+
+void	ft_putnbr(int n,char *str,int *cn,t_list *pt)
+{
+	int		pwd;
+	int		mwd;
+	int		i;
+	i = 0;
+	pwd = 0;
+	mwd = 0;
+	//if (pt->state)
+	//{
+		if (pt->zero && !(pt->minus && pt->per))
+			mwd = ft_atoi(&str[i]);
+		if (pt->minus)
+			mwd = ft_atoi(&str[i+1]);
+		if (pt->per)
+		{
+			while(str[i] && str[i] != '.')
+				i++;
+			if (str[i])
+				pwd = ft_atoi(&str[i+1]);
+		}
+		ft_putnbr_original(n,pwd,cn,mwd);
+	//}
+
+	
 }

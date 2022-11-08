@@ -3,13 +3,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdarg.h>
-typedef struct t_list
+/*typedef struct t_list
 {
 	int minus;
 	int zero;
 	int per;
 	int dec;
-}t_list;
+}t_list;*/
 void    *ft_memset(void *b, int c, size_t len)
 {
         size_t          i;
@@ -64,7 +64,8 @@ void 	ft_putstr(char *str,int *ptr)
 		i++;
 	}
 }
-void ft_putnbr(int n,char c,int *ptr)
+
+/*void    ft_putnbr_original(char *str,char fs,int i,int *cn,t_list *pt)
 {
 	unsigned int 	nb;
 	nb = n;	
@@ -79,7 +80,8 @@ void ft_putnbr(int n,char c,int *ptr)
 	if (nb / 10)
 		ft_putnbr(nb/10,c,ptr);
 	ft_putchar((nb % 10) + 48,ptr);
-}
+}*/
+
 void hex(unsigned int nb,char c,int *ptr)
 {
 	char arr[16]="0123456789abcdef";
@@ -109,7 +111,8 @@ void	hexvalue(void *pt,int *ptr)
 	ft_putchar('x',ptr);
 	hexlong((unsigned long)pt,ptr);
 }
-void	placeholder(char c,int *ptr,va_list args)
+
+void	placeholder(char *st,char c,int *ptr,va_list args,t_list *pt)
 {
 	if(c == 'c')
         	ft_putchar(va_arg(args,int),ptr);
@@ -122,9 +125,9 @@ void	placeholder(char c,int *ptr,va_list args)
 		ft_putstr(str,ptr);
 	}
       	if(c == 'd' || c == 'i')
-       		ft_putnbr(va_arg(args,int),c,ptr);
+			ft_putnbr(va_arg(args,int),st,ptr,pt);
         if(c == 'u')
-        	ft_putnbr(va_arg(args,unsigned int),c,ptr);
+        	ft_putnbr(va_arg(args,unsigned int),st,ptr,pt);
         if(c == 'x' || c == 'X')
                	hex(va_arg(args,int),c,ptr);
         if(c == 'p')
@@ -143,7 +146,7 @@ int	ft_check_ph(char c)
 	return (1);
 }
 
-void comb(char *str,int *i,int *ptr,va_list args,t_list *pt)
+/*void comb(char *str,int *i,int *ptr,va_list args,t_list *pt)
 {
 	int cn;
 	int	cz;
@@ -153,7 +156,6 @@ void comb(char *str,int *i,int *ptr,va_list args,t_list *pt)
 	if (pt->minus == 1)
 	{
 		cn = ft_atoi(&str[*i]);
-		while (str[*i] && str[*i] != '.')
 			*i = *i + 1;
 		*i = *i + 1;
 		n = va_arg(args,int);
@@ -168,23 +170,22 @@ void comb(char *str,int *i,int *ptr,va_list args,t_list *pt)
 	while (!ft_check_ph(str[*i]) && str[*i])
 		*i = *i + 1;
 	//placeholder(str[*i],&cn,args);
-}
+}*/
 
-void check(char *str,int j,int *ptr,va_list args,t_list *pt)
+int	scan_flags(char *str,int i,va_list args,t_list *pt)
 {
-	int	i;
-	i = 0;
-	while (str[i] && str[i] != '.')
+
+	while (str[i] && ft_check_ph(str[i]))
 	{
+		if (str[i] == '.')
+			pt->per = 1;
 		if (str[i] == '-')
 			pt->minus = 1;
 		if (str[i] == '0')
 			pt->zero = 1;
 		i++;
 	}
-	if (str[i] == '.')
-		pt->per = 1;
-	comb(str,&j,ptr,args,pt);
+	return (i);
 }
 
 int ft_printf(const char *str, ...)
@@ -194,19 +195,20 @@ int ft_printf(const char *str, ...)
 	data = libft_calloc(1,sizeof(t_list));
 	va_start(args,str);
 	int	i;
+	int	f;
 	int	cn;
 	cn = 0;
+	f = 0;
 	i = 0;
-	while (i < ft_strlen(str))
+	while (str[i])
 	{
-		if (str[i] != '%') //|| (data->minus != 1 || data->dec != 1))
+		if (str[i] != '%')
 			ft_putchar(str[i],&cn);
 		else
 		{
 			i++;
-			check((char *)(str + i),i,&cn,args,data);
-		//	break;
-			//placeholder(str[i],&cn,args);
+			f = scan_flags((char *)(str + i),i,args,data);
+			placeholder((char *)(str + i),str[f+1],&cn,args,data);
 		}
 		i++;
 	}
@@ -217,7 +219,7 @@ int main()
 {
 	int b;
 	b = 6;
-	ft_printf("%-10.2de",b);
+	ft_printf("%-10.2d",b);
 	//printf("\n%-10.0d",1);
 }
 /*#include <stdio.h>
