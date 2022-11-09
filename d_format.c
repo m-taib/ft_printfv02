@@ -39,8 +39,9 @@ int		nlen(long int n)
 	c = 0;
 	if (n < 0)
 	{
+		write(1,"-",1);
 		n *= -1;
-		c++;
+		//c++;
 	}
 	if (n ==0)
 		c++;
@@ -60,7 +61,6 @@ void ft_printnb(int n,int *cn)
 	//{
 		if (n < 0)
 		{
-			ft_putchar('-',cn);
 			nb = n * -1;
 		}
 	//}
@@ -69,24 +69,70 @@ void ft_printnb(int n,int *cn)
 	ft_putchar((nb % 10) + 48,cn);
 
 }
-void ft_putnbr_original(int n,int pwd,int *cn,int mwd)
+int handle_zero_spaces(int a,int b,char c,int *cn)
+{
+	int	i;
+	i = 0;
+	while (a > b)
+	{
+		i++;
+		ft_putchar(c,cn);
+                a--;
+	}
+	i = i + b;
+	return (i);
+}
+void ft_putnbr_original(int n,int pwd,int *cn,int mwd,t_list *pt)
 {
 	int		i;
-
-	i = 0;
-	while (pwd > nlen(n))
+	/*while (pwd > nlen(n))
 		{
 			i++;
 			ft_putchar('0',cn);
 			pwd--;
 		}
-	ft_printnb(n,cn);
-	i = i + nlen(n);
-	while (mwd > i)
+*/
+	if (pt->minus)
+	{
+		if (pt->per)	
+		{
+			i = handle_zero_spaces(pwd,nlen(n),'0',cn);
+			ft_printnb(n,cn);
+			if (n < 0)
+				i++;
+			handle_zero_spaces(mwd,i,' ',cn);
+		}
+		else
+		{
+			i = nlen(n);
+			ft_printnb(n,cn);
+			if (n < 0)
+                                i++;
+                        handle_zero_spaces(mwd,i,' ',cn);
+		}
+	}
+	if (pt->width)
+	{
+		if (pt->per)
+		{
+			if (n < 0)
+                                i++;
+			handle_zero_spaces(mwd,i,' ',cn);
+			handle_zero_spaces(pwd,nlen(n),'0',cn);
+			ft_printnb(n,cn);
+		}
+		else
+		{
+			i = nlen(n);
+			handle_zero_spaces(mwd,i,' ',cn);
+			ft_printnb(n,cn);
+		}	
+	}
+	/*while (mwd > i)
 	{
 		ft_putchar(' ',cn);
-		mwd++;
-	}
+		mwd--;
+	}*/
 }
 
 void	ft_putnbr(int n,char *str,int *cn,t_list *pt)
@@ -99,6 +145,8 @@ void	ft_putnbr(int n,char *str,int *cn,t_list *pt)
 	mwd = 0;
 	//if (pt->state)
 	//{
+		if (pt->width)
+			mwd = ft_atoi(&str[i]);
 		if (pt->zero && !(pt->minus && pt->per))
 			mwd = ft_atoi(&str[i]);
 		if (pt->minus)
@@ -110,7 +158,7 @@ void	ft_putnbr(int n,char *str,int *cn,t_list *pt)
 			if (str[i])
 				pwd = ft_atoi(&str[i+1]);
 		}
-		ft_putnbr_original(n,pwd,cn,mwd);
+		ft_putnbr_original(n,pwd,cn,mwd,pt);
 	//}
 
 	

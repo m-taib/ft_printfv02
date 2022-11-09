@@ -134,7 +134,7 @@ void	placeholder(char *st,char c,int *ptr,va_list args,t_list *pt)
                	hexvalue(va_arg(args,void *),ptr);
         if(c == '%')
               	ft_putchar('%',ptr);
-	
+
 }
 
 int	ft_check_ph(char c)
@@ -174,9 +174,11 @@ int	ft_check_ph(char c)
 
 int	scan_flags(char *str,int i,va_list args,t_list *pt)
 {
-
+	
 	while (str[i] && ft_check_ph(str[i]))
 	{
+		if (str[1] >= '0' && str[1] <= '9')
+			pt->width = 1;
 		if (str[i] == '.')
 			pt->per = 1;
 		if (str[i] == '-')
@@ -207,8 +209,9 @@ int ft_printf(const char *str, ...)
 		else
 		{
 			i++;
-			f = scan_flags((char *)(str + i),i,args,data);
-			placeholder((char *)(str + i),str[f+1],&cn,args,data);
+			f = scan_flags((char *)str,i,args,data);
+			placeholder((char *)(str + i),str[f],&cn,args,data);
+			i = f;
 		}
 		i++;
 	}
@@ -218,8 +221,8 @@ int ft_printf(const char *str, ...)
 int main()
 {
 	int b;
-	b = 6;
-	ft_printf("%-10.2d",b);
+	b = -6;
+	ft_printf("%-5.2d",b);
 	//printf("\n%-10.0d",1);
 }
 /*#include <stdio.h>

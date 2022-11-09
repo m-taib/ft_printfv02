@@ -10,6 +10,7 @@ typedef struct t_list
      int zero;
      int per;
      int dec;
+     int width;
 }t_list;
 int ft_printf(const char *str, ...);
 int     ft_strlen(const char *str);
