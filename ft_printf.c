@@ -9,6 +9,7 @@
 	int zero;
 	int per;
 	int dec;
+	int	space;
 }t_list;*/
 void    *ft_memset(void *b, int c, size_t len)
 {
@@ -111,7 +112,17 @@ void	hexvalue(void *pt,int *ptr)
 	ft_putchar('x',ptr);
 	hexlong((unsigned long)pt,ptr);
 }
+void reset(t_list *pt)
+{
+	pt->minus = 0;
+    pt->zero = 0;
+    pt->per = 0;
+    pt->dec = 0;
+    pt->width = 0;
+	pt->space = 0;
+	pt->plus = 0;
 
+}
 void	placeholder(char *st,char c,int *ptr,va_list args,t_list *pt)
 {
 	if(c == 'c')
@@ -134,7 +145,7 @@ void	placeholder(char *st,char c,int *ptr,va_list args,t_list *pt)
                	hexvalue(va_arg(args,void *),ptr);
         if(c == '%')
               	ft_putchar('%',ptr);
-
+		reset(pt);
 }
 
 int	ft_check_ph(char c)
@@ -146,45 +157,25 @@ int	ft_check_ph(char c)
 	return (1);
 }
 
-/*void comb(char *str,int *i,int *ptr,va_list args,t_list *pt)
-{
-	int cn;
-	int	cz;
-	int n;
-	cz = 0;
-	cn = 0;
-	if (pt->minus == 1)
-	{
-		cn = ft_atoi(&str[*i]);
-			*i = *i + 1;
-		*i = *i + 1;
-		n = va_arg(args,int);
-		cz = ft_atoi(str + *i) - nlen(n);
-		cn = cn - cz - nlen(n);
-		while(cz--)
-			write(1,"0",1);
-		ft_putnbr(n,'d',ptr);
-		while(cn--)
-			write(1," ",1);	
-	}
-	while (!ft_check_ph(str[*i]) && str[*i])
-		*i = *i + 1;
-	//placeholder(str[*i],&cn,args);
-}*/
-
 int	scan_flags(char *str,int i,va_list args,t_list *pt)
 {
 	
 	while (str[i] && ft_check_ph(str[i]))
 	{
-		if (str[1] >= '0' && str[1] <= '9')
+		if (str[i] == '-')
+			pt->minus = 1;
+		if ((str[i] >= '0' && str[i] <= '9') && str[i-1] != '-')
 			pt->width = 1;
 		if (str[i] == '.')
 			pt->per = 1;
-		if (str[i] == '-')
-			pt->minus = 1;
 		if (str[i] == '0')
 			pt->zero = 1;
+		if (str[i] == ' ' && !pt->width)
+			pt->space = 1;
+		if (pt->width && pt->space)
+			pt->space = 0;
+		if (str[i] == '+' && !pt->space)
+			pt->plus = 1;
 		i++;
 	}
 	return (i);
@@ -209,6 +200,10 @@ int ft_printf(const char *str, ...)
 		else
 		{
 			i++;
+			if (str[i] == '-')
+				while (!(str[i+1] >= '0' && str[i+1] <= '9'))
+					i++;
+			//printf("str[i] = %c",str[i]);
 			f = scan_flags((char *)str,i,args,data);
 			placeholder((char *)(str + i),str[f],&cn,args,data);
 			i = f;
@@ -222,8 +217,8 @@ int main()
 {
 	int b;
 	b = -6;
-	ft_printf("%-5.2d",b);
-	//printf("\n%-10.0d",1);
+	ft_printf("%-4d||\n",b);
+	printf("%-4d",-1);
 }
 /*#include <stdio.h>
 int	main()

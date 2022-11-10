@@ -11,6 +11,8 @@ typedef struct t_list
      int per;
      int dec;
      int width;
+	 int space;
+	 int plus;
 }t_list;
 int ft_printf(const char *str, ...);
 int     ft_strlen(const char *str);

@@ -6,7 +6,7 @@
 /*   By: mtaib <mtaib@student.1337.ma>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/07 11:26:26 by mtaib             #+#    #+#             */
-/*   Updated: 2022/11/08 20:19:41 by mtaib            ###   ########.fr       */
+/*   Updated: 2022/11/10 15:29:28 by mtaib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "ft_printf.h"
@@ -39,7 +39,6 @@ int		nlen(long int n)
 	c = 0;
 	if (n < 0)
 	{
-		write(1,"-",1);
 		n *= -1;
 		//c++;
 	}
@@ -77,7 +76,7 @@ int handle_zero_spaces(int a,int b,char c,int *cn)
 	{
 		i++;
 		ft_putchar(c,cn);
-                a--;
+        a--;
 	}
 	i = i + b;
 	return (i);
@@ -85,18 +84,16 @@ int handle_zero_spaces(int a,int b,char c,int *cn)
 void ft_putnbr_original(int n,int pwd,int *cn,int mwd,t_list *pt)
 {
 	int		i;
-	/*while (pwd > nlen(n))
-		{
-			i++;
-			ft_putchar('0',cn);
-			pwd--;
-		}
-*/
+
+	if (pt->space && (pt->minus || pt->per))
+		write(1," ",1);
 	if (pt->minus)
 	{
 		if (pt->per)	
 		{
 			i = handle_zero_spaces(pwd,nlen(n),'0',cn);
+			if (n < 0)
+				write(1,"-",1);
 			ft_printnb(n,cn);
 			if (n < 0)
 				i++;
@@ -105,18 +102,23 @@ void ft_putnbr_original(int n,int pwd,int *cn,int mwd,t_list *pt)
 		else
 		{
 			i = nlen(n);
+			if (pt->plus && n > 0)
+				write(1,"+",1);
+			if ( n < 0)
+				write(1,"-",1);
 			ft_printnb(n,cn);
 			if (n < 0)
-                                i++;
-                        handle_zero_spaces(mwd,i,' ',cn);
+				i++;
+            handle_zero_spaces(mwd,i,' ',cn);
 		}
 	}
 	if (pt->width)
 	{
 		if (pt->per)
 		{
+			i = 0;
 			if (n < 0)
-                                i++;
+				i++;
 			handle_zero_spaces(mwd,i,' ',cn);
 			handle_zero_spaces(pwd,nlen(n),'0',cn);
 			ft_printnb(n,cn);
@@ -124,15 +126,16 @@ void ft_putnbr_original(int n,int pwd,int *cn,int mwd,t_list *pt)
 		else
 		{
 			i = nlen(n);
+			if (pt->plus && (n > 0 || n < 0))
+				mwd--;
 			handle_zero_spaces(mwd,i,' ',cn);
+			if (pt->plus && n > 0)
+				write(1,"+",1);
+			if (n < 0)
+				write(1,"-",1);
 			ft_printnb(n,cn);
 		}	
 	}
-	/*while (mwd > i)
-	{
-		ft_putchar(' ',cn);
-		mwd--;
-	}*/
 }
 
 void	ft_putnbr(int n,char *str,int *cn,t_list *pt)
@@ -150,7 +153,19 @@ void	ft_putnbr(int n,char *str,int *cn,t_list *pt)
 		if (pt->zero && !(pt->minus && pt->per))
 			mwd = ft_atoi(&str[i]);
 		if (pt->minus)
-			mwd = ft_atoi(&str[i+1]);
+		{
+			if (pt->space || pt->plus)
+			{
+				while(str[i] && str[i] != '-')
+					i++;
+				if (n > 0)
+					mwd = ft_atoi(&str[i+1]) - 1;
+				else
+					mwd = ft_atoi(&str[i+1]);
+			}
+			else
+				mwd = ft_atoi(&str[i+1]);
+		}
 		if (pt->per)
 		{
 			while(str[i] && str[i] != '.')
