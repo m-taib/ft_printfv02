@@ -84,16 +84,38 @@ int handle_zero_spaces(int a,int b,char c,int *cn)
 void ft_putnbr_original(int n,int pwd,int *cn,int mwd,t_list *pt)
 {
 	int		i;
-
-	if (pt->space && (pt->minus || pt->per))
+	int	s;
+	s = 0;
+	if (pt->space && !pt->width && !pwd && !mwd)//(pt->minus || pt->per))
+	{
 		write(1," ",1);
+		ft_printnb(n,cn);
+	}
 	if (pt->minus)
 	{
 		if (pt->per)	
 		{
-			i = handle_zero_spaces(pwd,nlen(n),'0',cn);
+
+			i = pwd;
+			if (pt->plus && (n > 0 || n < 0))
+			{mwd--;
+				if (n > 0)
+					s = 1;}
+			if (pwd > nlen(n))
+				if (pwd > i + nlen(n))
+					i = pwd;
+				else
+					i = nlen(n);
+			else
+				i = nlen(n);
 			if (n < 0)
 				write(1,"-",1);
+			if (s == 1)
+			{
+				mwd++;
+				write(1,"+",1);
+			}
+			i = handle_zero_spaces(pwd,i,'0',cn);
 			ft_printnb(n,cn);
 			if (n < 0)
 				i++;
@@ -109,24 +131,45 @@ void ft_putnbr_original(int n,int pwd,int *cn,int mwd,t_list *pt)
 			ft_printnb(n,cn);
 			if (n < 0)
 				i++;
-            handle_zero_spaces(mwd,i,' ',cn);
+            		handle_zero_spaces(mwd,i,' ',cn);
 		}
 	}
 	if (pt->width)
 	{
 		if (pt->per)
 		{
-			i = 0;
+			if (pt->plus && (n >= 0 || n < 0))
+			{	
+				mwd--;
+				if (n >= 0)
+					s = 1;}
+			i = nlen(n);
+			if (pwd > nlen(n))
+				if (mwd > i + nlen(n))
+					i = pwd;
+				else
+					i = nlen(n);
+			else
+				i = nlen(n);
 			if (n < 0)
-				i++;
-			handle_zero_spaces(mwd,i,' ',cn);
-			handle_zero_spaces(pwd,nlen(n),'0',cn);
+				mwd--;
+				//i++;
+			if (mwd > i)
+				handle_zero_spaces(mwd,i,' ',cn);
+			if (s == 1)
+				write(1,"+",1);
+			if (n < 0)
+				write(1,"-",1);
+			if (pwd > nlen(n))
+				handle_zero_spaces(pwd,nlen(n),'0',cn);
 			ft_printnb(n,cn);
 		}
 		else
 		{
 			i = nlen(n);
-			if (pt->plus && (n > 0 || n < 0))
+			if (pt->plus && (n > 0))// || n < 0))
+				mwd--;
+			if (n < 0)
 				mwd--;
 			handle_zero_spaces(mwd,i,' ',cn);
 			if (pt->plus && n > 0)
@@ -152,6 +195,7 @@ void	ft_putnbr(int n,char *str,int *cn,t_list *pt)
 			mwd = ft_atoi(&str[i]);
 		if (pt->zero && !(pt->minus && pt->per))
 			mwd = ft_atoi(&str[i]);
+
 		if (pt->minus)
 		{
 			if (pt->space || pt->plus)

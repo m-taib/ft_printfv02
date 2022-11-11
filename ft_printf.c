@@ -164,7 +164,7 @@ int	scan_flags(char *str,int i,va_list args,t_list *pt)
 	{
 		if (str[i] == '-')
 			pt->minus = 1;
-		if ((str[i] >= '0' && str[i] <= '9') && str[i-1] != '-')
+		if ((str[i] >= '0' && str[i] <= '9') && !pt->minus)
 			pt->width = 1;
 		if (str[i] == '.')
 			pt->per = 1;
@@ -201,9 +201,8 @@ int ft_printf(const char *str, ...)
 		{
 			i++;
 			if (str[i] == '-')
-				while (!(str[i+1] >= '0' && str[i+1] <= '9'))
+				while (!(str[i+1] >= '0' && str[i+1] <= '9') && str[i+1] == '-')
 					i++;
-			//printf("str[i] = %c",str[i]);
 			f = scan_flags((char *)str,i,args,data);
 			placeholder((char *)(str + i),str[f],&cn,args,data);
 			i = f;
@@ -216,9 +215,11 @@ int ft_printf(const char *str, ...)
 int main()
 {
 	int b;
-	b = -6;
-	ft_printf("%-4d||\n",b);
-	printf("%-4d",-1);
+	//b = -10;
+	//ft_printf("%+30.20d||\n",b);
+	b = 0;
+	ft_printf("%+30.20d||\n",b);
+	printf("%+30.20d",b);
 }
 /*#include <stdio.h>
 int	main()
