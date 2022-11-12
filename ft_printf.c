@@ -3,14 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdarg.h>
-/*typedef struct t_list
-{
-	int minus;
-	int zero;
-	int per;
-	int dec;
-	int	space;
-}t_list;*/
+
 void    *ft_memset(void *b, int c, size_t len)
 {
         size_t          i;
@@ -66,22 +59,6 @@ void 	ft_putstr(char *str,int *ptr)
 	}
 }
 
-/*void    ft_putnbr_original(char *str,char fs,int i,int *cn,t_list *pt)
-{
-	unsigned int 	nb;
-	nb = n;	
-	if(c!='u')
-	{
-		if (n < 0)
-		{
-			ft_putchar('-',ptr);
-			nb = n * -1;
-		}
-	}
-	if (nb / 10)
-		ft_putnbr(nb/10,c,ptr);
-	ft_putchar((nb % 10) + 48,ptr);
-}*/
 
 void hex(unsigned int nb,char c,int *ptr)
 {
@@ -114,6 +91,7 @@ void	hexvalue(void *pt,int *ptr)
 }
 void reset(t_list *pt)
 {
+	pt->status = 0;
 	pt->minus = 0;
     pt->zero = 0;
     pt->per = 0;
@@ -156,7 +134,13 @@ int	ft_check_ph(char c)
 			return (0);
 	return (1);
 }
-
+int	check_status(t_list *pt)
+{
+	if (pt->minus || pt->zero || pt->per || pt->dec || pt->width
+			|| pt->space || pt->plus)
+		return (1);
+	return (0);
+}
 int	scan_flags(char *str,int i,va_list args,t_list *pt)
 {
 	
@@ -178,9 +162,15 @@ int	scan_flags(char *str,int i,va_list args,t_list *pt)
 			pt->plus = 1;
 		i++;
 	}
+	pt->status = check_status(pt);
 	return (i);
 }
 
+void skip(char *str,int *i,char c)
+{
+	while (!(str[*i+1] >= '0' && str[*i+1] <= '9') && str[*i+1] == c)
+		*i = *i + 1;
+}
 int ft_printf(const char *str, ...)
 {
 	va_list args;
@@ -200,10 +190,22 @@ int ft_printf(const char *str, ...)
 		else
 		{
 			i++;
-			if (str[i] == '-')
-				while (!(str[i+1] >= '0' && str[i+1] <= '9') && str[i+1] == '-')
+
+			if (data)
+			{
+				while (!(str[i] >= '0' && str[i] <= '9') && str[i])
+				{
+					skip((char *)str,&i,str[i]);
+					f = scan_flags((char *)str,i,args,data);
 					i++;
-			f = scan_flags((char *)str,i,args,data);
+				}
+					f = scan_flags((char *)str,i,args,data);
+				
+			}
+			else
+					f = scan_flags((char *)str,i,args,data);	
+			//printf("str[i] = %c\n",str[i]);
+			//break;
 			placeholder((char *)(str + i),str[f],&cn,args,data);
 			i = f;
 		}
@@ -215,11 +217,9 @@ int ft_printf(const char *str, ...)
 int main()
 {
 	int b;
-	//b = -10;
-	//ft_printf("%+30.20d||\n",b);
-	b = 0;
-	ft_printf("%+30.20d||\n",b);
-	printf("%+30.20d",b);
+	b = 9;
+	ft_printf("%---5.2d||\n",b);
+	printf("%---5.2d||\n",b);
 }
 /*#include <stdio.h>
 int	main()

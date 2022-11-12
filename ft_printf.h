@@ -6,6 +6,7 @@
 #include <stdarg.h>
 typedef struct t_list
 {
+	 int status;
      int minus;
      int zero;
      int per;
